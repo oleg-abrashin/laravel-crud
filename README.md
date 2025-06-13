@@ -51,6 +51,12 @@ After a few minutes, the application will be available at:
 - API: `http://localhost:8000`
 - Mailhog (for test emails): `http://localhost:8025`
 
+To test if API is working please use following command:
+
+```bash
+make test-api
+```
+
 The `make` command will:
 
 - Check Docker installation and daemon status
