@@ -6,6 +6,12 @@ export
 
 all: check-docker fix-credentials ensure-env composer-install sail-install sail-up wait-for-laravel migrate test info
 
+# Run this manually to start containers (without rebuild)
+up: sail-up wait-for-laravel info
+
+# Run this manually to stop all containers and cleanup volumes
+down: sail-down
+
 check-docker:
 	@command -v docker >/dev/null 2>&1 || { echo "❌ Docker is not installed."; exit 1; }
 	@docker info >/dev/null 2>&1 || { echo "❌ Docker is not running."; exit 1; }
@@ -42,14 +48,20 @@ sail-down:
 	@./vendor/bin/sail down --volumes --remove-orphans
 
 wait-for-laravel:
-	@echo "⏳ Waiting for Laravel to be ready..."
+	@echo "⏳ Waiting for Laravel to be ready (artisan)..."
 	@until ./vendor/bin/sail artisan --version >/dev/null 2>&1; do \
-		echo "🔄 Still waiting..."; \
+		echo "🔄 Still waiting for artisan..."; \
 		sleep 2; \
 	done
-	@echo "✅ Laravel is ready."
+	@echo "✅ Artisan is available."
 	@echo "🛠 Generating app key if needed..."
 	@./vendor/bin/sail artisan key:generate || true
+	@echo "🌐 Verifying HTTP server is running..."
+	@until curl -sSf http://localhost:8000 >/dev/null 2>&1; do \
+		echo "🔄 Waiting for HTTP on localhost:8000..."; \
+		sleep 2; \
+	done
+	@echo "✅ HTTP is up and running on http://localhost:8000"
 
 migrate:
 	@echo "🧩 Running migrations..."

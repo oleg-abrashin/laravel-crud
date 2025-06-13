@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  laravel.test:
+    ports:
+      - '${APP_PORT:-8000}:80'
+      - '9003:9003' # Xdebug
+    volumes:
+      - './:/var/www/html'
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: "client_host=host.docker.internal"
+
+  pgsql:
+    ports:
+      - '5432:5432'
+
+  mailpit:
+    ports:
+      - '8025:8025'
