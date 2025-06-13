@@ -101,32 +101,36 @@ info:
 # --- Custom test cases with curl to verify API behavior ---
 # Note: You can run these commands manually or call via `make test-api`
 
-# Create user with emails, expects HTTP 201
+# --- Custom curl API tests ---
+
 test-create-user:
 	@echo "📧 Testing user creation with emails..."
-	@curl -s -X POST http://0.0.0.0:8000/api/users -H "Content-Type: application/json" -d '{"first_name":"John","last_name":"Doe","phone":"+48123123123","emails":["john@example.com","doe@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X POST http://0.0.0.0:8000/api/users \
+	     -H "Content-Type: application/json" \
+	     -d '{"first_name":"John","last_name":"Doe","phone":"+48123123123","emails":["john@example.com","doe@example.com"]}' \
+	     -w "\nHTTP Code: %{http_code}\n"
 
-# Get list of users, expects HTTP 200
 test-list-users:
 	@echo "📋 Testing listing users..."
-	@curl -s http://0.0.0.0:8000/api/users -w "\nHTTP Code: %{http_code}\n"
+	@curl -s http://0.0.0.0:8000/api/users \
+	     -w "\nHTTP Code: %{http_code}\n"
 
-# Update user with id=1 (adjust ID as needed), expects HTTP 200
 test-update-user:
 	@echo "✏️ Testing updating user ID=1..."
-	@curl -s -X PUT http://0.0.0.0:8000/api/users/1 -H "Content-Type: application/json" -d '{"first_name":"Jane","last_name":"Doe","phone":"+48123456789","emails":["jane@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X PUT http://0.0.0.0:8000/api/users/1 \
+	     -H "Content-Type: application/json" \
+	     -d '{"first_name":"Jane","last_name":"Doe","phone":"+48123456789","emails":["jane@example.com"]}' \
+	     -w "\nHTTP Code: %{http_code}\n"
 
-# Delete user with id=1 (adjust ID as needed), expects HTTP 204
-test-delete-user:
-	@echo "🗑 Testing deleting user ID=1..."
-	@curl -s -X DELETE http://0.0.0.0:8000/api/users/1 -w "\nHTTP Code: %{http_code}\n"
-
-# Send welcome email to user ID=1 (adjust ID as needed), expects HTTP 200
 test-send-welcome-mail:
 	@echo "📨 Testing sending welcome mail to user ID=1..."
-	@curl -s -X POST http://0.0.0.0:8000/api/users/1/send-welcome -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X POST http://0.0.0.0:8000/api/users/1/send-welcome \
+	     -w "\nHTTP Code: %{http_code}\n"
 
+test-delete-user:
+	@echo "🗑 Testing deleting user ID=1..."
+	@curl -s -X DELETE http://0.0.0.0:8000/api/users/1 \
+	     -w "\nHTTP Code: %{http_code}\n"
 
-# Собирательная цель, которая сначала чистит базу, а потом прогоняет curl-тесты
 test-api: migrate-fresh test-create-user test-list-users test-update-user test-send-welcome-mail test-delete-user
 
