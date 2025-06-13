@@ -1,4 +1,5 @@
-PROJECT_NAME=laravel-crud
+PROJECT_NAME = laravel-crud
+APP_PORT     = 8000
 
 export
 
@@ -6,15 +7,15 @@ export
 
 all: check-docker fix-credentials ensure-env composer-install sail-install sail-up wait-for-laravel migrate test info
 
-# Run this manually to start containers (without rebuild)
-up: sail-up wait-for-laravel info
+# Start everything (without rebuilding)
+up: sail-install sail-up wait-for-laravel migrate info
 
-# Run this manually to stop all containers and cleanup volumes
+# Stop and clean up
 down: sail-down
 
 check-docker:
 	@command -v docker >/dev/null 2>&1 || { echo "❌ Docker is not installed."; exit 1; }
-	@docker info >/dev/null 2>&1 || { echo "❌ Docker is not running."; exit 1; }
+	@docker info   >/dev/null 2>&1 || { echo "❌ Docker is not running."; exit 1; }
 
 fix-credentials:
 	@if ! command -v docker-credential-desktop >/dev/null 2>&1; then \
@@ -48,40 +49,54 @@ sail-down:
 	@./vendor/bin/sail down --volumes --remove-orphans
 
 wait-for-laravel:
-	@echo "⏳ Waiting for Laravel artisan command..."
+	@echo "⏳ Waiting for Artisan…"
 	@timeout=60; \
 	until ./vendor/bin/sail artisan --version >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
-		echo "🔄 Waiting for artisan... ($$timeout)"; \
+		echo "🔄 Still waiting for Artisan… ($$timeout)"; \
 		sleep 2; \
 		timeout=$$((timeout - 2)); \
 	done; \
 	if [ $$timeout -eq 0 ]; then \
-		echo "❌ Timeout waiting for artisan"; \
-		exit 1; \
+		echo "❌ Timed out waiting for Artisan"; exit 1; \
 	fi
-	@echo "✅ Artisan available."
-	@echo "🛠 Generating app key if needed..."
-	@./vendor/bin/sail artisan key:generate || true
-	@echo "🌐 Checking HTTP server on http://localhost:${APP_PORT:-8000}/up ..."
+	@echo "✅ Artisan is ready."
+	@echo "🛠 Generating APP_KEY…"
+	@./vendor/bin/sail artisan key:generate --force >/dev/null || true
+
+	@echo "🌐 Hitting the health‐check at http://localhost:$(APP_PORT)/up …"
 	@timeout=60; \
-	until curl -sSf http://localhost:${APP_PORT:-8000}/up >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
-		echo "🔄 Waiting for HTTP on /up ... ($$timeout)"; \
+	until curl -sSf http://localhost:$(APP_PORT)/up >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
+		echo "🔄 Waiting for HTTP health… ($$timeout)"; \
 		sleep 2; \
 		timeout=$$((timeout - 2)); \
 	done; \
 	if [ $$timeout -eq 0 ]; then \
-		echo "❌ Timeout waiting for HTTP server"; \
-		exit 1; \
+		echo "❌ Timed out waiting for HTTP /up"; exit 1; \
 	fi
-	@echo "✅ HTTP server is up on http://localhost:${APP_PORT:-8000}/up"
+	@echo "✅ HTTP is up on http://localhost:$(APP_PORT)/up"
 
 migrate:
-	@echo "🧩 Running migrations..."
-	@./vendor/bin/sail artisan migrate
+	@echo "🧩 Running database migrations…"
+	@./vendor/bin/sail artisan migrate --force
+
+# Refresh Database before testing
+migrate-fresh:
+	@echo "🧹 Dropping & re-running all migrations (fresh)…"
+	@./vendor/bin/sail artisan migrate:fresh --seed --no-interaction
+
 
 test:
-	@echo "✅ Running PHPUnit tests..."
+	@echo "✅ Running PHPUnit tests…"
 	@./vendor/bin/sail test || true
+
+info:
+	@echo ""
+	@echo "🎉 Project is ready!"
+	@echo "🌐 API: http://localhost:$(APP_PORT)"
+	@echo "📬 Mailpit: http://localhost:8025"
+	@echo ""
+
+
 
 # --- Custom test cases with curl to verify API behavior ---
 # Note: You can run these commands manually or call via `make test-api`
@@ -111,12 +126,7 @@ test-send-welcome-mail:
 	@echo "📨 Testing sending welcome mail to user ID=1..."
 	@curl -s -X POST http://0.0.0.0:8000/api/users/1/send-welcome -w "\nHTTP Code: %{http_code}\n"
 
-# Run all above curl API tests sequentially
-test-api: test-create-user test-list-users test-update-user test-send-welcome-mail test-delete-user
 
-info:
-	@echo ""
-	@echo "🎉 Project is ready!"
-	@echo "🌐 API: http://0.0.0.0:8000"
-	@echo "📬 Mailpit: http://0.0.0.0:8025"
-	@echo ""
+# Собирательная цель, которая сначала чистит базу, а потом прогоняет curl-тесты
+test-api: migrate-fresh test-create-user test-list-users test-update-user test-send-welcome-mail test-delete-user
+
