@@ -142,6 +142,12 @@ curl -X POST http://localhost:8000/api/users \
   }'
 ```
 
+or 
+
+```bash
+make test-create-user
+```
+
 Expected response: `201 Created` with user and emails JSON.
 
 ---
@@ -152,6 +158,12 @@ Expected response: `201 Created` with user and emails JSON.
 
 ```bash
 curl http://localhost:8000/api/users
+```
+
+or
+
+```bash
+make test-list-users
 ```
 
 Expected response: list of users and their emails.
@@ -207,6 +219,12 @@ Expected response: `204 No Content`.
 
 ```bash
 curl -X POST http://localhost:8000/api/users/1/send-welcome
+```
+
+or
+
+```bash
+make test-send-welcome-mail
 ```
 
 Expected response:
