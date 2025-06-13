@@ -62,11 +62,10 @@ wait-for-laravel:
 	@echo "✅ Artisan available."
 	@echo "🛠 Generating app key if needed..."
 	@./vendor/bin/sail artisan key:generate || true
-
-	@echo "🌐 Checking HTTP server on localhost:8000..."
+	@echo "🌐 Checking HTTP server on http://localhost:${APP_PORT:-8000}/up ..."
 	@timeout=60; \
-	until curl -sSf http://localhost:8000 >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
-		echo "🔄 Waiting for HTTP on localhost:8000... ($$timeout)"; \
+	until curl -sSf http://localhost:${APP_PORT:-8000}/up >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
+		echo "🔄 Waiting for HTTP on /up ... ($$timeout)"; \
 		sleep 2; \
 		timeout=$$((timeout - 2)); \
 	done; \
@@ -74,7 +73,7 @@ wait-for-laravel:
 		echo "❌ Timeout waiting for HTTP server"; \
 		exit 1; \
 	fi
-	@echo "✅ HTTP server is up on http://localhost:8000"
+	@echo "✅ HTTP server is up on http://localhost:${APP_PORT:-8000}/up"
 
 migrate:
 	@echo "🧩 Running migrations..."
@@ -90,27 +89,27 @@ test:
 # Create user with emails, expects HTTP 201
 test-create-user:
 	@echo "📧 Testing user creation with emails..."
-	@curl -s -X POST http://localhost:8000/api/users -H "Content-Type: application/json" -d '{"first_name":"John","last_name":"Doe","phone":"+48123123123","emails":["john@example.com","doe@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X POST http://0.0.0.0:8000/api/users -H "Content-Type: application/json" -d '{"first_name":"John","last_name":"Doe","phone":"+48123123123","emails":["john@example.com","doe@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
 
 # Get list of users, expects HTTP 200
 test-list-users:
 	@echo "📋 Testing listing users..."
-	@curl -s http://localhost:8000/api/users -w "\nHTTP Code: %{http_code}\n"
+	@curl -s http://0.0.0.0:8000/api/users -w "\nHTTP Code: %{http_code}\n"
 
 # Update user with id=1 (adjust ID as needed), expects HTTP 200
 test-update-user:
 	@echo "✏️ Testing updating user ID=1..."
-	@curl -s -X PUT http://localhost:8000/api/users/1 -H "Content-Type: application/json" -d '{"first_name":"Jane","last_name":"Doe","phone":"+48123456789","emails":["jane@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X PUT http://0.0.0.0:8000/api/users/1 -H "Content-Type: application/json" -d '{"first_name":"Jane","last_name":"Doe","phone":"+48123456789","emails":["jane@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
 
 # Delete user with id=1 (adjust ID as needed), expects HTTP 204
 test-delete-user:
 	@echo "🗑 Testing deleting user ID=1..."
-	@curl -s -X DELETE http://localhost:8000/api/users/1 -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X DELETE http://0.0.0.0:8000/api/users/1 -w "\nHTTP Code: %{http_code}\n"
 
 # Send welcome email to user ID=1 (adjust ID as needed), expects HTTP 200
 test-send-welcome-mail:
 	@echo "📨 Testing sending welcome mail to user ID=1..."
-	@curl -s -X POST http://localhost:8000/api/users/1/send-welcome -w "\nHTTP Code: %{http_code}\n"
+	@curl -s -X POST http://0.0.0.0:8000/api/users/1/send-welcome -w "\nHTTP Code: %{http_code}\n"
 
 # Run all above curl API tests sequentially
 test-api: test-create-user test-list-users test-update-user test-send-welcome-mail test-delete-user
@@ -118,6 +117,6 @@ test-api: test-create-user test-list-users test-update-user test-send-welcome-ma
 info:
 	@echo ""
 	@echo "🎉 Project is ready!"
-	@echo "🌐 API: http://localhost:8000"
-	@echo "📬 Mailpit: http://localhost:8025"
+	@echo "🌐 API: http://0.0.0.0:8000"
+	@echo "📬 Mailpit: http://0.0.0.0:8025"
 	@echo ""
