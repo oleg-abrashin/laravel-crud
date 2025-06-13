@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+    laravel.test:
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile
+        container_name: laravel_sail_app
+        ports:
+            - '${APP_PORT:-8000}:8000'
+        environment:
+            WWWGROUP: '${WWWGROUP}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - redis
+            - mailhog
+
+    pgsql:
+        image: postgres:15
+        container_name: laravel_pgsql
+        environment:
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
+        ports:
+            - '5432:5432'
+        volumes:
+            - 'pgsql-data:/var/lib/postgresql/data'
+        networks:
+            - sail
+
+    redis:
+        image: redis:alpine
+        container_name: laravel_redis
+        ports:
+            - "6379:6379"
+        networks:
+            - sail
+
+    mailhog:
+        image: mailhog/mailhog
+        container_name: laravel_mailhog
+        ports:
+            - "1025:1025"
+            - "8025:8025"
+        networks:
+            - sail
+
+networks:
+    sail:
+        driver: bridge
+
+volumes:
+    pgsql-data:
