@@ -76,14 +76,44 @@ wait-for-laravel:
 	fi
 	@echo "✅ HTTP server is up on http://localhost:8000"
 
-
 migrate:
 	@echo "🧩 Running migrations..."
 	@./vendor/bin/sail artisan migrate
 
 test:
-	@echo "✅ Running tests..."
+	@echo "✅ Running PHPUnit tests..."
 	@./vendor/bin/sail test || true
+
+# --- Custom test cases with curl to verify API behavior ---
+# Note: You can run these commands manually or call via `make test-api`
+
+# Create user with emails, expects HTTP 201
+test-create-user:
+	@echo "📧 Testing user creation with emails..."
+	@curl -s -X POST http://localhost:8000/api/users -H "Content-Type: application/json" -d '{"first_name":"John","last_name":"Doe","phone":"+48123123123","emails":["john@example.com","doe@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+
+# Get list of users, expects HTTP 200
+test-list-users:
+	@echo "📋 Testing listing users..."
+	@curl -s http://localhost:8000/api/users -w "\nHTTP Code: %{http_code}\n"
+
+# Update user with id=1 (adjust ID as needed), expects HTTP 200
+test-update-user:
+	@echo "✏️ Testing updating user ID=1..."
+	@curl -s -X PUT http://localhost:8000/api/users/1 -H "Content-Type: application/json" -d '{"first_name":"Jane","last_name":"Doe","phone":"+48123456789","emails":["jane@example.com"]}' -w "\nHTTP Code: %{http_code}\n"
+
+# Delete user with id=1 (adjust ID as needed), expects HTTP 204
+test-delete-user:
+	@echo "🗑 Testing deleting user ID=1..."
+	@curl -s -X DELETE http://localhost:8000/api/users/1 -w "\nHTTP Code: %{http_code}\n"
+
+# Send welcome email to user ID=1 (adjust ID as needed), expects HTTP 200
+test-send-welcome-mail:
+	@echo "📨 Testing sending welcome mail to user ID=1..."
+	@curl -s -X POST http://localhost:8000/api/users/1/send-welcome -w "\nHTTP Code: %{http_code}\n"
+
+# Run all above curl API tests sequentially
+test-api: test-create-user test-list-users test-update-user test-send-welcome-mail test-delete-user
 
 info:
 	@echo ""
