@@ -15,13 +15,15 @@ class UserTest extends TestCase
         $payload = [
             'first_name' => 'John',
             'last_name'  => 'Doe',
-            'phone'      => '+48123456789',
+            'phone'      => '+48123123123',
             'emails'     => ['john@example.com', 'doe@example.com'],
         ];
 
         $response = $this->postJson('/api/users', $payload);
+
         $response->assertCreated()
             ->assertJsonFragment(['first_name' => 'John'])
             ->assertJsonCount(2, 'emails');
     }
+
 }
