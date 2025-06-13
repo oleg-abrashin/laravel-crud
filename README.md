@@ -1,61 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="https://laravel.com" target="_blank">
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
+  </a>
 </p>
 
-## About Laravel
+<p align="center">
+  <a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+  <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ℹ️ Project Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+This is a recruitment task that implements a simple RESTful API using **Laravel 12**. It provides CRUD operations for users and their associated email addresses, as well as functionality to send a welcome message.
 
-## Learning Laravel
+### ✨ Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Create, read, update, and delete users
+- Each user can have multiple email addresses
+- Ability to send a welcome message ("Welcome user XXX") to all associated email addresses
+- RESTful JSON API
+- Unit tests included
+- Runs in Docker using Laravel Sail
+- PostgreSQL and Redis support
+- Mail delivery to real email addresses is supported
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Getting Started
 
-## Laravel Sponsors
+### 1. Requirements
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- Docker (running daemon)
+- GNU Make
+- (Optional) Postman or cURL for API testing
 
-### Premium Partners
+### 2. Launch the project
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+git clone https://github.com/oleg-abrashin/laravel-crud.git
+cd laravel-crud
+make
+```
 
-## Contributing
+After a few minutes, the application will be available at:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- API: `http://localhost:8000`
+- Mailhog (for test emails): `http://localhost:8025`
 
-## Code of Conduct
+The `make` command will:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Check Docker installation and daemon status
+- Ensure `.env` file exists
+- Automatically fix Docker credential issues (for macOS)
+- Build and start all Docker containers
+- Ensure compatibility with ARM64 platforms (e.g., Apple M1/M2)
+- Wait for database readiness
+- Generate `APP_KEY`
+- Run `composer install` and database migrations
+- Execute unit tests
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🧪 Running Tests
 
-## License
+To execute the PHPUnit tests:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+make test
+```
+
+---
+
+## 📦 Docker & Infrastructure
+
+All Docker-related files are located in the `.docker/` directory and are orchestrated using `docker-compose.yml`.
+
+Includes:
+- Laravel Sail
+- PostgreSQL database
+- Redis cache
+- Xdebug support
+- Mailhog for mail inspection
+- Custom `Makefile` for full project setup with one command
+
+---
+
+## 📬 Email Delivery
+
+By default, the project is configured to use Mailhog for testing purposes. To use real email sending, update the SMTP settings in your `.env` file.
+
+---
+
+## 🧱 Tech Stack
+
+- Laravel 12
+- PHP 8.3
+- PostgreSQL
+- Redis
+- Docker
+- Laravel Sail
+- PHPUnit
+- Mailhog
+
+---
+
+## 👤 Author
+
+**Oleg Abrashin**  
+[GitHub Profile](https://github.com/oleg-abrashin)
+
+---
+
+## 📝 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
