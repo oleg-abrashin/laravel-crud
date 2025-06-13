@@ -118,3 +118,107 @@ By default, the project is configured to use Mailhog for testing purposes. To us
 ## 📝 License
 
 This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+Отлично, вот полное дополнение к твоему `README.md`, полностью на **английском языке**, с разметкой, в едином формате:
+
+---
+
+## 📘 API Usage Guide
+
+This section describes how to manually test all required features using `curl`. You can also use Postman or any other REST client.
+
+### ✅ 1. Create a New User
+
+`POST /api/users`
+
+```bash
+curl -X POST http://localhost:8000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+48123123123",
+    "emails": ["john@example.com", "doe@example.com"]
+  }'
+```
+
+Expected response: `201 Created` with user and emails JSON.
+
+---
+
+### 🔍 2. Retrieve All Users
+
+`GET /api/users`
+
+```bash
+curl http://localhost:8000/api/users
+```
+
+Expected response: list of users and their emails.
+
+---
+
+### 🔎 3. Retrieve Single User
+
+`GET /api/users/{id}`
+
+```bash
+curl http://localhost:8000/api/users/1
+```
+
+Replace `1` with the actual user ID.
+
+---
+
+### ✏️ 4. Update User
+
+`PUT /api/users/{id}`
+
+```bash
+curl -X PUT http://localhost:8000/api/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "phone": "+48123456789",
+    "emails": ["jane@example.com"]
+  }'
+```
+
+Expected response: updated user data.
+
+---
+
+### ❌ 5. Delete User
+
+`DELETE /api/users/{id}`
+
+```bash
+curl -X DELETE http://localhost:8000/api/users/1
+```
+
+Expected response: `204 No Content`.
+
+---
+
+### 📧 6. Send Welcome Email to All User Emails
+
+`POST /api/users/{id}/send-welcome`
+
+```bash
+curl -X POST http://localhost:8000/api/users/1/send-welcome
+```
+
+Expected response:
+
+```json
+{
+  "message": "Emails sent"
+}
+```
+
+You can view sent emails via Mailpit:
+
+👉 [http://localhost:8025](http://localhost:8025)
+
+---
