@@ -48,20 +48,34 @@ sail-down:
 	@./vendor/bin/sail down --volumes --remove-orphans
 
 wait-for-laravel:
-	@echo "⏳ Waiting for Laravel to be ready (artisan)..."
-	@until ./vendor/bin/sail artisan --version >/dev/null 2>&1; do \
-		echo "🔄 Still waiting for artisan..."; \
+	@echo "⏳ Waiting for Laravel artisan command..."
+	@timeout=60; \
+	until ./vendor/bin/sail artisan --version >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
+		echo "🔄 Waiting for artisan... ($$timeout)"; \
 		sleep 2; \
-	done
-	@echo "✅ Artisan is available."
+		timeout=$$((timeout - 2)); \
+	done; \
+	if [ $$timeout -eq 0 ]; then \
+		echo "❌ Timeout waiting for artisan"; \
+		exit 1; \
+	fi
+	@echo "✅ Artisan available."
 	@echo "🛠 Generating app key if needed..."
 	@./vendor/bin/sail artisan key:generate || true
-	@echo "🌐 Verifying HTTP server is running..."
-	@until curl -sSf http://localhost:8000 >/dev/null 2>&1; do \
-		echo "🔄 Waiting for HTTP on localhost:8000..."; \
+
+	@echo "🌐 Checking HTTP server on localhost:8000..."
+	@timeout=60; \
+	until curl -sSf http://localhost:8000 >/dev/null 2>&1 || [ $$timeout -eq 0 ]; do \
+		echo "🔄 Waiting for HTTP on localhost:8000... ($$timeout)"; \
 		sleep 2; \
-	done
-	@echo "✅ HTTP is up and running on http://localhost:8000"
+		timeout=$$((timeout - 2)); \
+	done; \
+	if [ $$timeout -eq 0 ]; then \
+		echo "❌ Timeout waiting for HTTP server"; \
+		exit 1; \
+	fi
+	@echo "✅ HTTP server is up on http://localhost:8000"
+
 
 migrate:
 	@echo "🧩 Running migrations..."
